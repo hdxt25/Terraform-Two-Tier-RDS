@@ -1,0 +1,11 @@
+variable "project_name" {}
+variable "environment" {}
+variable "iam_instance_profile_name" {}
+variable "asg_image_id" {}
+variable "asg_instance_type" {}
+variable "min_size" {}
+variable "max_size" {}
+variable "desired_capacity" {}
+variable "asg_security_groups" {}
+variable "vpc_zone_identifier" {}
+variable "target_group_arns" {}

@@ -1,0 +1,10 @@
+.env
+.env.*
+*.pem
+*.key
+id_rsa
+terraform.tfstate
+.terraform/
+.terraform.lock.hcl
+node_modules/
+dist/
