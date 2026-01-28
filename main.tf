@@ -4,15 +4,15 @@
 module "vpc" {
   source = "./modules/vpc"
 
-  project_name         = var.project_name
-  environment          = var.environment
+  project_name          = var.project_name
+  environment           = var.environment
   pri-availability-zone = var.pri-availability-zone
   pri-cidr-block        = var.pri-cidr-block
-  pub-subnet-count     = var.pub-subnet-count
-  pri-subnet-count     = var.pri-subnet-count
-  pub-cidr-block       = var.pub-cidr-block
+  pub-subnet-count      = var.pub-subnet-count
+  pri-subnet-count      = var.pri-subnet-count
+  pub-cidr-block        = var.pub-cidr-block
   pub-availability-zone = var.pub-availability-zone
-  cidr_block           = var.cidr_block
+  cidr_block            = var.cidr_block
 }
 
 # RDS Module
@@ -26,18 +26,18 @@ module "rds" {
   db_name              = var.db_name
   db_user              = var.db_user
   db_password          = module.secrets.db_password
-  db_instance_class       = var.db_instance_class
-  db_allocated_storage    = var.db_allocated_storage
-  db_engine_version       = var.db_engine_version
+  db_instance_class    = var.db_instance_class
+  db_allocated_storage = var.db_allocated_storage
+  db_engine_version    = var.db_engine_version
 }
 
 # Secrets Module
 module "secrets" {
   source = "./modules/secrets"
 
-  db_name  = var.db_name
-  db_user  = var.db_user
-  db_host  = module.rds.db_endpoint
+  db_name = var.db_name
+  db_user = var.db_user
+  db_host = module.rds.db_endpoint
 }
 
 resource "aws_iam_role" "ec2_role" {
@@ -102,29 +102,29 @@ resource "aws_instance" "web" {
   }
 }
 
-
+# Comment alb, asg modules before creating custom AMI Image.
 module "alb" {
-    source = "./modules/alb"
-    
-    project_name = var.project_name
-    environment  = var.environment
-    vpc_id       = module.vpc.vpc_id
-    security_groups    = [module.vpc.alb_sg_id]
-    subnets            = module.vpc.public_subnet_ids
+  source = "./modules/alb"
+
+  project_name    = var.project_name
+  environment     = var.environment
+  vpc_id          = module.vpc.vpc_id
+  security_groups = [module.vpc.alb_sg_id]
+  subnets         = module.vpc.public_subnet_ids
 }
 
 module "asg" {
   source = "./modules/asg"
 
-    asg_image_id = var.asg_image_id
-    asg_instance_type = var.asg_instance_type
-    min_size = var.min_size
-    max_size = var.max_size
-    desired_capacity = var.desired_capacity
-    project_name = var.project_name
-    environment  = var.environment
-    iam_instance_profile_name = aws_iam_instance_profile.ec2_profile.name
-    asg_security_groups = [module.vpc.ec2_sg_id] 
-    vpc_zone_identifier = module.vpc.private_subnet_ids
-    target_group_arns = [module.alb.alb_target_group_arn]
+  asg_image_id              = var.asg_image_id
+  asg_instance_type         = var.asg_instance_type
+  min_size                  = var.min_size
+  max_size                  = var.max_size
+  desired_capacity          = var.desired_capacity
+  project_name              = var.project_name
+  environment               = var.environment
+  iam_instance_profile_name = aws_iam_instance_profile.ec2_profile.name
+  asg_security_groups       = [module.vpc.ec2_sg_id]
+  vpc_zone_identifier       = module.vpc.private_subnet_ids
+  target_group_arns         = [module.alb.alb_target_group_arn]
 }

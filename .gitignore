@@ -8,3 +8,4 @@ terraform.tfstate
 .terraform.lock.hcl
 node_modules/
 dist/
+build/

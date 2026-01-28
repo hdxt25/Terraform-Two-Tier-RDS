@@ -14,11 +14,11 @@ variable "pri-cidr-block" {
 }
 
 variable "pub-availability-zone" {
-    type = list(string)
+  type = list(string)
 }
 
 variable "pri-availability-zone" {
-    type = list(string)
+  type = list(string)
 }
 
 
