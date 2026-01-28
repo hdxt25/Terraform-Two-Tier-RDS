@@ -1,0 +1,76 @@
+name: "Production IAC"
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Choose action"
+        required: true
+        type: choice
+        options:
+          - apply
+          - destroy
+
+env:
+  AWS_REGION: us-east-1
+  BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
+
+jobs:
+# =======================
+# APPLY
+# =======================
+  terraform-apply:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'apply'
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.14.0
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+      - run: terraform fmt -check
+      - run: terraform validate
+      - run: terraform plan -var-file=dev.tfvars -out=planfile
+      - run: terraform apply -auto-approve planfile
+
+# =======================
+# DESTROY
+# =======================
+  terraform-destroy:
+    runs-on: ubuntu-latest
+    if: github.event.inputs.action == 'destroy'
+
+    defaults:
+      run:
+        shell: bash
+        working-directory: terraform
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: 1.14.0
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - run: terraform init -backend-config="bucket=$BUCKET_TF_STATE"
+      - run: terraform destroy -auto-approve -var-file=dev.tfvars
