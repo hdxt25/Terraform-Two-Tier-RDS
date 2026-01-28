@@ -12,7 +12,7 @@ on:
           - destroy
 
 env:
-  AWS_REGION: us-east-1
+  AWS_REGION: us-east-2
   BUCKET_TF_STATE: ${{ secrets.BUCKET_TF_STATE }}
 
 jobs:
